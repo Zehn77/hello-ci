@@ -1,0 +1,39 @@
+# Node
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Env files
+.env
+.env.*
+.env.local
+.env.development.local
+
+# Logs
+logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Build outputs
+dist
+build
+coverage
+
+# OS / Editors
+.DS_Store
+.vscode
+.idea
+*.sublime-workspace
+
+# Misc
+.cache
+.parcel-cache
+*.tgz
