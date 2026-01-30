@@ -1,38 +1,49 @@
-name: Build and Push to Docker Hub
+name: Deploy to Cloud Run via Artifact Registry
 
 on:
   push:
     branches: ["main"]
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world-api:latest
-
+      # 1. Google Cloud-ga ulanish
       - name: Google Auth
-        uses: "google-github-actions/auth@v1"
+        uses: "google-github-actions/auth@v2"
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
+      # 2. Gcloud CLI-ni o'rnatish
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      # 3. Docker-ni Google bilan bog'lash
+      - name: Configure Docker for GCP
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+
+      # 4. Google-da repository yaratish (agar yo'q bo'lsa)
+      - name: Create Artifact Repository
+        run: |
+          gcloud artifacts repositories create my-repo \
+            --repository-format=docker \
+            --location=europe-west1 || true
+
+      # 5. Build va Push (Docker Hub-ga emas, to'g'ridan-to'g'ri Google-ga)
+      - name: Build and Push Image
+        run: |
+          IMAGE_TAG="europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/hello-api:latest"
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+
+      # 6. Deploy qilish
       - name: Deploy to Cloud Run
-        uses: "google-github-actions/deploy-cloudrun@v1"
-        with:
-          service: "hello-world-api"
-          image: "index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/hello-world-api:latest"
-          region: "europe-west1"
-          flags: "--allow-unauthenticated"
+        run: |
+          gcloud run deploy hello-world-api \
+            --image europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/hello-api:latest \
+            --region europe-west1 \
+            --allow-unauthenticated \
+            --platform managed
