@@ -37,4 +37,4 @@ jobs:
           region: "europe-west1"
           flags: "--allow-unauthenticated"
           env_vars: |
-            PORT=8080
+            NODE_ENV=production
