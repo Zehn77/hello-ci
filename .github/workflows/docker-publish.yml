@@ -35,7 +35,7 @@ jobs:
       # 5. Build va Push (Docker Hub-ga emas, to'g'ridan-to'g'ri Google-ga)
       - name: Build and Push Image
         run: |
-          IMAGE_TAG="europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/hello-api:latest"
+          IMAGE_TAG="europe-west1-docker.pkg.dev/skilled-booking-485111-j7/my-repo/hello-api:latest"
           docker build -t $IMAGE_TAG .
           docker push $IMAGE_TAG
 
