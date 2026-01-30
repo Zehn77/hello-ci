@@ -33,8 +33,6 @@ jobs:
         uses: "google-github-actions/deploy-cloudrun@v1"
         with:
           service: "hello-world-api"
-          image: "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/hello-world-api:latest"
+          image: "index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/hello-world-api:latest"
           region: "europe-west1"
           flags: "--allow-unauthenticated"
-          env_vars: |
-            NODE_ENV=production
